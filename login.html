@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset='UTF-8' />
+    <link rel="apple-touch-icon" sizes="57x57" href="img/ico/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="img/ico/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="img/ico/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="img/ico/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="img/ico/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="img/ico/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="img/ico/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="img/ico/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="img/ico/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="img/ico/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/ico/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="img/ico/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/ico/favicon-16x16.png" />
+    <link rel="manifest" href="img/ico/manifest.json" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="ing/ico/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" />
+    <link href="css/CustomCss.css" rel="stylesheet" />
+    <script src="js/CustomJs.js"></script>
+    <script type="text/javascript">
+        //Load the Facebook JS SDK
+        (function (d) {
+            var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+            if (d.getElementById(id)) { return; }
+            js = d.createElement('script'); js.id = id; js.async = true;
+            js.src = "//connect.facebook.net/en_US/all.js";
+            ref.parentNode.insertBefore(js, ref);
+        }(document));
+        // Init the SDK upon load
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '525895944276079', // App ID
+                status: true, // check login status
+                cookie: true, // enable cookies to allow the server to access the session
+                xfbml: true  // parse XFBML
+            });
+            // Specify the extended permissions needed to view user data
+            // The user will be asked to grant these permissions to the app (so only pick those that are needed)
+            var permissions = [
+              'email',
+              'user_birthday',
+              'user_work_history',
+            ].join(',');
+            // Specify the user fields to query the OpenGraph for.
+            // Some values are dependent on the user granting certain permissions
+            var fields = [
+              'id',
+              'name',
+              'first_name',
+              'middle_name',
+              'last_name',
+              'gender',
+              'birthday',
+              'email',
+              'picture',
+            ].join(',');
+            function showDetails() {
+                FB.api('/me', { fields: fields }, function (details) {
+                    // output the response
+                    //$('#status').html(JSON.stringify(details, null, '\t'));
+
+                    $('#profile-img').attr("src", details.picture.data.url).attr('style', 'border-radius:25px');
+                    $('#profileImage').show(500);
+                    //$('#fb-login').attr('style', 'display:none;');
+                });
+            }
+            $('#fb-login').click(function () {
+                //initiate OAuth Login
+                FB.login(function (response) {
+                    // if login was successful, execute the following code
+                    if (response.authResponse) {
+                        waitingDialog.show();
+                        setTimeout(function () { waitingDialog.hide(); }, 3000);
+                        showDetails();
+                    }
+                }, { scope: permissions });
+            });
+        };
+
+
+        var waitingDialog = waitingDialog || (function ($) {
+            'use strict';
+
+            // Creating modal dialog's DOM
+            var $dialog = $(
+                '<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">' +
+                '<div class="modal-dialog modal-m">' +
+                '<div class="modal-content">' +
+                    '<div class="modal-header"><h3 style="margin:0;"></h3></div>' +
+                    '<div class="modal-body">' +
+                        '<div class="progress progress-striped active" style="margin-bottom:0;"><div class="progress-bar" style="width: 100%"></div></div>' +
+                    '</div>' +
+                '</div></div></div>');
+
+            return {
+                /**
+                 * Opens our dialog
+                 * @param message Custom message
+                 * @param options Custom options:
+                 * 				  options.dialogSize - bootstrap postfix for dialog size, e.g. "sm", "m";
+                 * 				  options.progressType - bootstrap postfix for progress bar type, e.g. "success", "warning".
+                 */
+                show: function (message, options) {
+                    // Assigning defaults
+                    if (typeof options === 'undefined') {
+                        options = {};
+                    }
+                    if (typeof message === 'undefined') {
+                        message = 'Loading';
+                    }
+                    var settings = $.extend({
+                        dialogSize: 'm',
+                        progressType: '',
+                        onHide: null // This callback runs after the dialog was hidden
+                    }, options);
+
+                    // Configuring dialog
+                    $dialog.find('.modal-dialog').attr('class', 'modal-dialog').addClass('modal-' + settings.dialogSize);
+                    $dialog.find('.progress-bar').attr('class', 'progress-bar');
+                    if (settings.progressType) {
+                        $dialog.find('.progress-bar').addClass('progress-bar-' + settings.progressType);
+                    }
+                    $dialog.find('h3').text(message);
+                    // Adding callbacks
+                    if (typeof settings.onHide === 'function') {
+                        $dialog.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
+                            settings.onHide.call($dialog);
+                        });
+                    }
+                    // Opening dialog
+                    $dialog.modal();
+                },
+                /**
+                 * Closes dialog
+                 */
+                hide: function () {
+                    $dialog.modal('hide');
+                }
+            };
+
+        })(jQuery);
+    </script>
+</head>
+<body>
+
+    <!-- Large modal -->
+    <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="ModelDetails">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="profileImage" style="text-align: center; display: none;">
+                        <img id="profile-img" src="#" class="profile-img-card" />
+                    </div>
+                    <h4>Name</h4>
+                    <p id="Name"></p>
+
+                    <h4>Email</h4>
+                    <p id="EmailID"></p>
+
+                    <h4>Date of birth</h4>
+                    <p id="DOB"></p>
+
+                    <h4>URL</h4>
+                    <p id="Link"></p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="fb-root"></div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="panel panel-login">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <a href="#" class="active" id="login-form-link">Login</a>
+                            </div>
+                            <div class="col-xs-6">
+                                <a href="#" id="register-form-link">Register</a>
+                            </div>
+                        </div>
+                        <hr />
+                        <div>
+                            <div class="row omb_socialButtons" style="margin-top: 10px;">
+                                <div class="col-xs-4 col-sm-4">
+                                    <a href="#" class="btn btn-lg btn-block omb_btn-facebook" id="fb-login">
+                                        <i class="fa fa-facebook visible-xs" style="color: white;"></i>
+                                        <span class="hidden-xs">Facebook</span>
+                                    </a>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <a href="#" class="btn btn-lg btn-block omb_btn-twitter">
+                                        <i class="fa fa-twitter visible-xs"></i>
+                                        <span class="hidden-xs">Twitter</span>
+                                    </a>
+                                </div>
+                                <div class="col-xs-4 col-sm-4">
+                                    <a href="#" class="btn btn-lg btn-block omb_btn-google" onclick="login()">
+                                        <i class="fa fa-google-plus visible-xs"></i>
+                                        <span class="hidden-xs">Google+</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="status">
+                            </div>
+                            <div class="row omb_loginOr">
+                                <div class="col-xs-12 col-sm-12">
+                                    <hr class="omb_hrOr" />
+                                    <span class="omb_spanOr"><b>OR</b></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <form id="login-form" action="#" method="post" role="form" style="display: block;">
+                                    <div class="form-group">
+                                        <input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password" />
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <input type="checkbox" checked="checked" class="" name="remember" id="remember" />
+                                        <label for="remember">Remember Me</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-sm-offset-3">
+                                                <input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Log In" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="text-center">
+                                                    <a href="#" tabindex="5" class="forgot-password">Forgot Password?</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <form id="register-form" action="#" method="post" role="form" style="display: none;">
+                                    <div class="form-group">
+                                        <input type="text" name="username" id="Text1" tabindex="1" class="form-control" placeholder="Username" value="" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" name="email" id="email" tabindex="1" class="form-control" placeholder="Email Address" value="" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="password" id="password1" tabindex="2" class="form-control" placeholder="Password" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password" />
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-sm-offset-3">
+                                                <input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Register Now" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function login() {
+            var myParams = {
+                'clientid': '648508218564-vg4o0o4t43c58hg3hk8mjc50oos5d6in.apps.googleusercontent.com', //You need to set client id
+                'cookiepolicy': 'single_host_origin',
+                'callback': 'loginCallback', //callback function
+                'approvalprompt': 'force',
+                'scope': 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read'
+            };
+            gapi.auth.signIn(myParams);
+        }
+        function loginCallback(result) {
+            if (result['status']['signed_in']) {
+                var request = gapi.client.plus.people.get(
+                {
+                    'userId': 'me'
+                });
+                request.execute(function (resp) {
+                    var email = '';
+                    if (resp['emails']) {
+                        for (i = 0; i < resp['emails'].length; i++) {
+                            if (resp['emails'][i]['type'] == 'account') {
+                                email = resp['emails'][i]['value'];
+                            }
+                        }
+                    }
+                    var str = "Name:" + resp['displayName'] + "<br>";
+                    str += "Image:" + resp['image']['url'] + "<br>";
+                    str += "<img src='" + resp['image']['url'] + "' /><br>";
+                    str += "URL:" + resp['url'] + "<br>";
+                    str += "Email:" + email + "<br>";
+                    document.getElementById("status").innerHTML = str;
+                });
+            }
+        }
+        function onLoadCallback() {
+            gapi.client.setApiKey('AIzaSyA1o0KMtSLQR4oLZeaohsqsQXzRTde6Fpc'); //set your API KEY
+            gapi.client.load('plus', 'v1', function () { });//Load Google + API
+        }
+    </script>
+
+    <script type="text/javascript">
+        (function () {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/client.js?onload=onLoadCallback';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+        })();
+    </script>
+</body>
+</html>
